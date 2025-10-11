@@ -52,11 +52,17 @@
 
 ---
 
-## 📚 其他教程
-- 🎥 [【星露谷物语开服 / 多人服务器 / 三端互通 / 远程联机教程】](https://www.bilibili.com/video/BV13VPJe6EM1/?share_source=copy_web&vd_source=dddc5d0c3c33183e95f30f7d1ccdb295)  
-- 🧠 [【Linux 无头模式运行教程】](https://blog.csdn.net/2401_87565228/article/details/148801625?spm=1001.2014.3001.5501)
+- 📚 其他教程
+  - 🎥 [【星露谷物语开服 / 多人服务器 / 三端互通 / 远程联机教程】](https://www.bilibili.com/video/BV13VPJe6EM1/?share_source=copy_web&vd_source=dddc5d0c3c33183e95f30f7d1ccdb295)  
+  - 🧠 [【Linux 无头模式运行教程】](https://blog.csdn.net/2401_87565228/article/details/148801625?spm=1001.2014.3001.5501)
 
 ---
+##  🧸 本项目维护中的MOD
+| MOD 名称 | 功能描述 |
+|:-:|:-|
+| [![ALOS](https://img.shields.io/badge/ALOS-Auto%20Life%20on%20Server-brightgreen?style=for-the-badge)](Mod/ALOS/README.md) | 无人值守运行游戏（自动睡觉、跳过剧情、自动操作） |
+| [![ServerCMD](https://img.shields.io/badge/ServerCMD-Headless%20Server%20Control-brightgreen?style=for-the-badge)](Mod/ServerCMD/README.md) | 在无头服务器环境下执行控制指令 |
+| [![ChatCommand](https://img.shields.io/badge/ChatCommand-In%20Game%20Console%20via%20Chat-brightgreen?style=for-the-badge)](Mod/ChatCommand/README.md) | 允许在游戏聊天框中执行控制台指令 |
 
 ## 😘 社区支持
 ### 🐧 QQ交流群
@@ -70,7 +76,14 @@
 
 
 ## 🧰 致谢
-- [**SMAPI**](https://github.com/Pathoschild/StardewModdingAPI)：提供了游戏注入与扩展机制  
+- [**SMAPI**](https://github.com/Pathoschild/StardewModdingAPI)：提供了游戏注入与扩展机制
+- [**圆心云计算**](https://tyteam.net)：为本项目提供了服务器托管服务   
+
+## 🤝 友情链接  
+- [**圆心云计算**](https://tyteam.net)：租赁服务器，成熟的，客制化运维方案，就选圆心云，一键开服
+- [**Stardew Valley**](https://www.stardewvalley.net)：星露谷物语游戏官网
+- [**Stardew-Valley-Mutiplayer-docker**](https://github.com/printfuck/stardew-multiplayer-docker)：星露谷物语多人游戏服务器docker部署
+> 如果您有成熟的部署方案，可以通过`PR`提交到本栏目，感谢您对社区的支持
 
 
 ## 🧮 Star History

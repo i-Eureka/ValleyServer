@@ -44,11 +44,17 @@ On Linux, use Xvfb.
 A one-click startup package is available in our QQ groups (see below).
 ```
 
-- Other Tutorials:  
+- 📚 Other Tutorials:  
   - [Hosting a Stardew Valley Multiplayer Server / Cross-Platform / Remote Play (Bilibili)](https://www.bilibili.com/video/BV13VPJe6EM1/?share_source=copy_web&vd_source=dddc5d0c3c33183e95f30f7d1ccdb295)  
   - [Running in Headless Mode on Linux (CSDN)](https://blog.csdn.net/2401_87565228/article/details/148801625?spm=1001.2014.3001.5501)
 
 ---
+## 🧸 MOD in this repo
+| MOD Name | Description |
+|:-:|:-|
+| [![ALOS](https://img.shields.io/badge/ALOS-Auto%20Life%20on%20Server-brightgreen?style=for-the-badge)](Mod/ALOS/README.md) | Run the game unattended — auto sleep, skip cutscenes, and perform automated actions. |
+| [![ServerCMD](https://img.shields.io/badge/ServerCMD-Headless%20Server%20Control-brightgreen?style=for-the-badge)](Mod/ServerCMD/README.md) | Execute control commands in a headless (no-GUI) server environment. |
+| [![ChatCommand](https://img.shields.io/badge/ChatCommand-In%20Game%20Console%20via%20Chat-brightgreen?style=for-the-badge)](Mod/ChatCommand/README.md) | Run console commands directly from the in-game chat box. |
 
 ## 😘 Community
 ### 🐧 QQ Groups
