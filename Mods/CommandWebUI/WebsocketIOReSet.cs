@@ -24,7 +24,7 @@ class TraceTextFilter
 class Singleilter
 {
     public bool IsPrint(string text){
-        if (text=="\n"){
+        if (text.Replace(" ","").Replace("/r","").Replace("/t","") =="\n"){
             return false;
         }
 

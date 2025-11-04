@@ -1,11 +1,11 @@
-using System;
+
 using System.Collections.Concurrent;
-using System.IO;
+
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
+
 using StardewModdingAPI;
 
 namespace CommandWebUI
@@ -15,26 +15,34 @@ namespace CommandWebUI
         private readonly HttpListener listener;
         private readonly IMonitor monitor;
         private readonly ConcurrentBag<WebSocket> sockets = new();
-        private string page;
+        private string IndexPage;
+        private string LoginPage;
         private bool running;
         public int Port;
+        private readonly string AccessToken;
 
         private readonly WebSocketReader Reader;
 
-        public Server(IMonitor monitor, WebSocketReader reader ,int port)
+        public Server(IMonitor monitor, WebSocketReader reader, int port, string acesstoken,ModConfig config)
         {
+            AccessToken = acesstoken;
             Reader = reader;
             Port = port;
             this.monitor = monitor;
             listener = new HttpListener();
             var _uri = $"http://+:{Port}";
             listener.Prefixes.Add($"{_uri}/");
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Mods","CommandWebUI","index.html");
-            page = File.ReadAllText(path);
-            page = page.Replace("{{WEBSOCKET_URL}}", "/ws");
-            if (page == null)
+
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Mods", "CommandWebUI", config.IndexPage);
+            IndexPage = File.ReadAllText(path);
+            IndexPage = IndexPage.Replace("{{WEBSOCKET_URL}}", "/ws");
+
+            var _loginPagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Mods", "CommandWebUI", config.LoginPage);
+            LoginPage = File.ReadAllText(_loginPagePath);
+
+            if (IndexPage == null)
             {
-                page = "<h1>CommandWebUI</h1>";
+                IndexPage = "<h1>CommandWebUI</h1>";
             }
         }
 
@@ -70,30 +78,42 @@ namespace CommandWebUI
 
         private async Task HandleHttpAsync(HttpListenerContext ctx)
         {
-            //判断终结点
-            monitor.Log($"{ctx.Request.Url.AbsolutePath}", LogLevel.Info);
-            if (ctx.Request.Url.AbsolutePath != "/index")
+            
+            if (ctx.Request.Url.AbsolutePath == "/index")
+
             {
-                ctx.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                // 从查询参数中获取 token 
+                var token = ctx.Request.QueryString["token"]; // 获取 URL 中的 token 参数
+                                                              // 检查是否提供了正确的 token
+                if (string.IsNullOrEmpty(token) || token != AccessToken) // 判断 token 是否为空且符合要求
+                {
+                    ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden; // 403 Forbidden
+                    await using var writer = new StreamWriter(ctx.Response.OutputStream);
+                    await writer.WriteAsync("Access denied: Invalid token."); // 提示访问被拒绝
+                    await writer.FlushAsync();
+                    ctx.Response.Close();
+                    return;
+                }
+                // 如果 token 验证通过，返回页面内容
+                ctx.Response.ContentType = "text/html; charset=utf-8";
+                await using var responseWriter = new StreamWriter(ctx.Response.OutputStream);
+                await responseWriter.WriteAsync($"{this.IndexPage}"); // 返回页面内容
+                await responseWriter.FlushAsync();
                 ctx.Response.Close();
-                return;
+
+
             }
-            ctx.Response.ContentType = "text/html; charset=utf-8";
-            await using var writer = new StreamWriter(ctx.Response.OutputStream);
-
-
-
-            await writer.WriteAsync($"{this.page}");
-
-
-
-            await writer.FlushAsync();
-            ctx.Response.Close();
+            else if(ctx.Request.Url.AbsolutePath == "/")
+            {
+                ctx.Response.ContentType = "text/html; charset=utf-8";
+                await using var responseWriter = new StreamWriter(ctx.Response.OutputStream);
+                await responseWriter.WriteAsync($"{this.LoginPage}"); // 返回页面内容
+                await responseWriter.FlushAsync();
+                ctx.Response.Close();
+            }
         }
-        
-
         private async Task HandleWebSocketAsync(HttpListenerContext ctx)
-        {   
+        {
 
             if (ctx.Request.Url.AbsolutePath != "/ws")
             {
@@ -119,13 +139,13 @@ namespace CommandWebUI
                     string msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     //作为控制台输入
 
-                    Console.WriteLine($"[WebSocket Input] {msg}");
+                    //Console.WriteLine($"[WebSocket Input] {msg}");
                     Reader.PushInput(msg);
                 }
 
                 await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", CancellationToken.None);
                 monitor.Log("client disconnected", LogLevel.Info);
-                
+
             }
             catch (Exception ex)
             {

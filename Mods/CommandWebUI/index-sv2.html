@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Console</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #000;
+        color: #fff;
+        font-family: 'Courier New', monospace;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        image-rendering: pixelated;
+      }
+
+      .console-header {
+        background-color: #fff;
+        color: #000;
+        border-bottom: 4px solid #000;
+        padding: 15px 20px;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-align: center;
+        box-shadow: 0 4px 0px #333;
+      }
+
+      #log {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        white-space: pre-wrap;
+        background-color: #fff;
+        color: #000;
+        border-left: 4px solid #000;
+        border-right: 4px solid #000;
+        margin: 0 20px;
+      }
+
+      #log::-webkit-scrollbar {
+        width: 12px;
+        background-color: #fff;
+      }
+
+      #log::-webkit-scrollbar-track {
+        background: #fff;
+        border: 2px solid #000;
+      }
+
+      #log::-webkit-scrollbar-thumb {
+        background: #000;
+        border: 2px solid #fff;
+      }
+
+      .input-container {
+        background-color: #fff;
+        border: 4px solid #000;
+        margin: 0 20px 20px 20px;
+        padding: 5px;
+        box-shadow: 4px 4px 0px #333;
+      }
+
+      #input {
+        border: 3px solid #000;
+        background: #fff;
+        color: #000;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        padding: 12px;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        font-weight: bold;
+      }
+
+      #input:focus {
+        background-color: #f0f0f0;
+      }
+
+      #input::placeholder {
+        color: #666;
+      }
+
+      .system {
+        color: #666;
+        font-weight: bold;
+        border-left: 3px solid #666;
+        padding-left: 8px;
+        margin: 5px 0;
+      }
+
+      .cmd {
+        color: #000;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        border-left: 3px solid #000;
+        padding: 5px 5px 5px 8px;
+        margin: 5px 0;
+      }
+
+      .error {
+        color: #fff;
+        background-color: #000;
+        font-weight: bold;
+        border: 2px solid #000;
+        padding: 5px 8px;
+        margin: 5px 0;
+      }
+
+      .output {
+        color: #000;
+        padding-left: 12px;
+        margin: 2px 0;
+        border-left: 2px dashed #ccc;
+      }
+
+      .status-bar {
+        background-color: #000;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 12px;
+        border-top: 3px solid #fff;
+      }
+
+      .pixel-decoration {
+        display: inline-block;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="console-header">
+      █ WEB CONSOLE █
+    </div>
+
+    <pre id="log"></pre>
+
+    <div class="input-container">
+      <input id="input" placeholder="▶ Type command here..." autofocus />
+    </div>
+
+    <div class="status-bar">
+      <span id="status">● Connecting...</span>
+    </div>
+
+    <script>
+      const log = document.getElementById("log");
+      const input = document.getElementById("input");
+      const status = document.getElementById("status");
+      const ws = new WebSocket("{{WEBSOCKET_URL}}");
+
+      function appendLine(text, cls = "output") {
+        const line = document.createElement("div");
+        if (cls) line.classList.add(cls);
+        line.textContent = text;
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      ws.onopen = () => {
+        appendLine("█ CONNECTED", "system");
+        status.innerHTML = '● <span class="pixel-decoration">ONLINE</span>';
+      };
+
+      ws.onclose = () => {
+        appendLine("█ DISCONNECTED", "system");
+        status.textContent = "● OFFLINE";
+      };
+
+      ws.onerror = () => {
+        appendLine("✖ ERROR CONNECTING", "error");
+        status.textContent = "● ERROR";
+      };
+
+      ws.onmessage = e => {
+        appendLine(e.data, "output");
+      };
+
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter" && input.value.trim() !== "") {
+          const cmd = input.value.trim();
+          appendLine("▶ " + cmd, "cmd"); 
+          ws.send(cmd);           
+          input.value = "";
+        }
+      });
+    </script>
+  </body>
+</html>
