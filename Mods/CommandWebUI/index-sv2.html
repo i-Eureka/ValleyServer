@@ -80,6 +80,8 @@
         width: 100%;
         box-sizing: border-box;
         font-weight: bold;
+        resize: vertical;
+        min-height: 45px;
       }
 
       #input:focus {
@@ -151,7 +153,7 @@
     <pre id="log"></pre>
 
     <div class="input-container">
-      <input id="input" placeholder="▶ Type command here..." autofocus />
+      <textarea id="input" placeholder="▶ Type command here... (Only paste)" autofocus rows="1"></textarea>
     </div>
 
     <div class="status-bar">
@@ -163,6 +165,10 @@
       const input = document.getElementById("input");
       const status = document.getElementById("status");
       const ws = new WebSocket("{{WEBSOCKET_URL}}");
+
+      // 历史命令记录
+      let commandHistory = [];
+      let historyIndex = -1;
 
       function appendLine(text, cls = "output") {
         const line = document.createElement("div");
@@ -191,13 +197,73 @@
         appendLine(e.data, "output");
       };
 
+      // 发送命令函数
+      function sendCommand(cmd) {
+        appendLine("▶ " + cmd, "cmd");
+        ws.send(cmd);
+      }
+
+      // 处理多行输入
+      function processMultilineInput(text) {
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line !== "");
+        
+        if (lines.length === 0) return;
+        
+        // 将整个多行文本作为一条历史记录
+        commandHistory.unshift(text);
+        historyIndex = -1;
+        
+        // 逐行发送
+        lines.forEach(line => {
+          sendCommand(line);
+        });
+      }
+
       input.addEventListener("keydown", e => {
-        if (e.key === "Enter" && input.value.trim() !== "") {
-          const cmd = input.value.trim();
-          appendLine("▶ " + cmd, "cmd"); 
-          ws.send(cmd);           
-          input.value = "";
+        // 上键 - 上一条命令
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (commandHistory.length > 0) {
+            if (historyIndex < commandHistory.length - 1) {
+              historyIndex++;
+              input.value = commandHistory[historyIndex];
+            }
+          }
         }
+        
+        // 下键 - 下一条命令
+        else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (historyIndex > 0) {
+            historyIndex--;
+            input.value = commandHistory[historyIndex];
+          } else if (historyIndex === 0) {
+            historyIndex = -1;
+            input.value = "";
+          }
+        }
+        
+        // Enter键 - 发送单行命令
+        else if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
+          e.preventDefault();
+          const cmd = input.value.trim();
+          
+          if (cmd !== "") {
+            // 检查是否是多行输入
+            if (cmd.includes('\n')) {
+              processMultilineInput(cmd);
+            } else {
+              // 单行命令
+              commandHistory.unshift(cmd);
+              historyIndex = -1;
+              sendCommand(cmd);
+            }
+            input.value = "";
+          }
+        }
+        
+        // Ctrl+Enter - 允许换行（多行输入模式）
+        // 不做处理，让默认行为生效
       });
     </script>
   </body>
