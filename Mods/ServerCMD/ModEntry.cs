@@ -14,7 +14,13 @@ public class ModEntry : Mod
         helper.ConsoleCommands.Add("ServerCMD.get_save_list", "获取存档列表\n\nUsage: get_save_list", this.GetSaveList);
         helper.ConsoleCommands.Add("ServerCMD.get_save_path", "获取存档路径\n\nUsage: new_save", this.GetSavePath);
         helper.ConsoleCommands.Add("ServerCMD.new_save", "创建新存档\n\nUsage: new_save", this.NewSave);
+        helper.ConsoleCommands.Add("ServerCMD.tp", "传送主机", this.HandleTPCommand);
     }
+    private void HandleTPCommand(string command, string[] args)
+    {
+        Monitor.Log("未完成的功能", LogLevel.Info);
+    }
+
     private void NewSave(string arg1, string[] arg2)
     { 
         new TitleMenu().createdNewCharacter(true);
