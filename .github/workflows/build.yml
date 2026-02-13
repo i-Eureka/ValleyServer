@@ -1,13 +1,18 @@
 name: Build releases
 on:
   push:
+    branches:
+      - main
+      
     paths:
       - '**.cs'
       - '**.csproj'
       - '**.slnx'
+      - 'Mods/**'
   pull_request:
     paths:
       - '**.cs'
+      - '**.csproj'
 
 jobs:
   build:
@@ -15,14 +20,18 @@ jobs:
     permissions:
       id-token: write
       attestations: write
+      contents: write  # 需要用于创建 release
     env:
       RELEASE_REF: refs/heads/stable
 
     steps:
       - name: Fetch code
         uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          fetch-tags: false
+          dotnet-version: '8.0.x'
 
       - name: Add build environment
         uses: Pathoschild/SMAPI-ModBuildWorkflow/add-build-environment@v0
@@ -36,30 +45,36 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build --configuration Release
-        continue-on-error: true  # 测试失败不阻止构建
+        continue-on-error: true
 
-      # 🔍 调试步骤
-      - name: Debug - List all files
-        if: always()
+      - name: Collect release packages
         run: |
-          echo "=== Current directory ==="
-          pwd
+          mkdir -p _releases
+          
+          echo "🔍 Searching for mod packages..."
+          find ./Mods -name "*.zip" -type f | while read zipfile; do
+            filename=$(basename "$zipfile")
+            echo "  ✓ $filename"
+            cp "$zipfile" "_releases/"
+          done
+          
           echo ""
-          echo "=== Directory structure ==="
-          ls -la
+          echo "📦 Packages ready for release:"
+          ls -lh _releases/
+          
+          # 统计
+          count=$(ls -1 _releases/*.zip 2>/dev/null | wc -l)
           echo ""
-          echo "=== Looking for _releases ==="
-          find . -type d -name "_releases" || echo "No _releases directory found"
-          echo ""
-          echo "=== Looking for zip files ==="
-          find . -name "*.zip" -type f || echo "No zip files found"
-          echo ""
-          echo "=== Checking bin directories ==="
-          find . -type d -name "bin"
+          echo "Total: $count package(s)"
+          
+          if [ $count -eq 0 ]; then
+            echo "❌ ERROR: No packages found!"
+            exit 1
+          fi
+        shell: bash
 
-      - name: Upload release zips
+      - name: Upload release artifacts
         uses: Pathoschild/SMAPI-ModBuildWorkflow/upload-release-artifacts@v0
-        if: success()  # 只在前面步骤成功时执行
         with:
           create_attestations: ${{github.ref == env.RELEASE_REF}}
           create_combined_zip: ${{github.ref == env.RELEASE_REF}}
