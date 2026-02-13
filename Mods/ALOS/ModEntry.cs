@@ -1,9 +1,4 @@
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Always_On_Server.Framework;
+using ALOS.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -17,7 +12,7 @@ using StardewValley.Network;
 using StardewValley.Objects;
 using SObject = StardewValley.Object;
 
-namespace Always_On_Server
+namespace ALOS
 {
     public class ModEntry : Mod
     {

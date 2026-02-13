@@ -1,4 +1,4 @@
-﻿namespace Always_On_Server.Framework
+﻿namespace ALOS.Framework
 {
     class ModData
     {

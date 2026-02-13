@@ -2,7 +2,7 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 
-namespace Always_On_Server.Framework
+namespace ALOS.Framework
 {
     class ModConfig
     {
