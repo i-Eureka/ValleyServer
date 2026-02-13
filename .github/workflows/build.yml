@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      
+      - stable
     paths:
       - '**.cs'
       - '**.csproj'
@@ -20,7 +20,7 @@ jobs:
     permissions:
       id-token: write
       attestations: write
-      contents: write  # 需要用于创建 release
+      contents: write
     env:
       RELEASE_REF: refs/heads/stable
 
@@ -47,11 +47,11 @@ jobs:
         run: dotnet test --no-build --configuration Release
         continue-on-error: true
 
-      - name: Collect release packages
+      - name: Collect individual mod packages
         run: |
           mkdir -p _releases
           
-          echo "🔍 Searching for mod packages..."
+          echo "🔍 Collecting individual mod packages..."
           find ./Mods -name "*.zip" -type f | while read zipfile; do
             filename=$(basename "$zipfile")
             echo "  ✓ $filename"
@@ -59,22 +59,63 @@ jobs:
           done
           
           echo ""
-          echo "📦 Packages ready for release:"
+          echo "📦 Individual packages:"
           ls -lh _releases/
+        shell: bash
+
+      # 🎯 关键步骤：创建解压后的整合包
+      - name: Create combined Mods package
+        run: |
+          mkdir -p _combined_temp
+          mkdir -p _releases_final
           
-          # 统计
-          count=$(ls -1 _releases/*.zip 2>/dev/null | wc -l)
+          echo "📂 Creating combined Mods package..."
+          
+          # 解压所有 mod zip 到临时目录
+          for zipfile in _releases/*.zip; do
+            if [ -f "$zipfile" ]; then
+              # 获取 mod 名称（去掉版本号）
+              modname=$(basename "$zipfile" .zip | sed 's/ [0-9].*$//')
+              echo "  Extracting: $modname"
+              
+              # 创建 mod 文件夹并解压
+              mkdir -p "_combined_temp/$modname"
+              unzip -q "$zipfile" -d "_combined_temp/$modname"
+            fi
+          done
+          
           echo ""
-          echo "Total: $count package(s)"
+          echo "📂 Combined package structure:"
+          ls -la _combined_temp/
           
-          if [ $count -eq 0 ]; then
-            echo "❌ ERROR: No packages found!"
-            exit 1
-          fi
+          # 打包成 Mods.zip
+          cd _combined_temp
+          zip -r ../Mods.zip . -q
+          cd ..
+          
+          # 移动到最终目录
+          mv Mods.zip _releases_final/
+          cp _releases/*.zip _releases_final/
+          
+          echo ""
+          echo "✅ Final packages:"
+          ls -lh _releases_final/
+          
+          # 显示 Mods.zip 内容预览
+          echo ""
+          echo "📋 Mods.zip contents:"
+          unzip -l _releases_final/Mods.zip | head -30
+        shell: bash
+
+      # 替换 _releases 为最终版本
+      - name: Prepare final release directory
+        run: |
+          rm -rf _releases
+          mv _releases_final _releases
         shell: bash
 
       - name: Upload release artifacts
         uses: Pathoschild/SMAPI-ModBuildWorkflow/upload-release-artifacts@v0
         with:
           create_attestations: ${{github.ref == env.RELEASE_REF}}
-          create_combined_zip: ${{github.ref == env.RELEASE_REF}}
+          create_combined_zip: false  # 禁用默认的整合包，我们自己创建
