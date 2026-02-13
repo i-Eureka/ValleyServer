@@ -47,7 +47,7 @@
 > ⚙️ **特殊场景运行技巧**
 - **无 GPU 环境运行**  
   - Windows 环境可使用 **Mesa3D**  
-  - Linux 环境可使用 **Xvfb**  (极不稳定且)
+  - Linux 环境可使用 **Xvfb**  (极不稳定)
   - 一键开服包可在 QQ 群内获取（见下方）
 
 ---
@@ -58,11 +58,15 @@
 
 ---
 ##  🧸 本项目维护中的MOD
-| MOD 名称 | 功能描述 |
-|:-:|:-|
-| [![ALOS](https://img.shields.io/badge/ALOS-Auto%20Life%20on%20Server-brightgreen?style=for-the-badge)](Mod/ALOS/README.md) | 无人值守运行游戏（自动睡觉、跳过剧情、自动操作） |
-| [![ServerCMD](https://img.shields.io/badge/ServerCMD-Headless%20Server%20Control-brightgreen?style=for-the-badge)](Mod/ServerCMD/README.md) | 在无头服务器环境下执行控制指令 |
-| [![ChatCommand](https://img.shields.io/badge/ChatCommand-In%20Game%20Console%20via%20Chat-brightgreen?style=for-the-badge)](Mod/ChatCommand/README.md) | 允许在游戏聊天框中执行控制台指令 |
+| MOD 名称 | 功能描述 |文档链接|
+|:-:|:-|:-|
+| `ALOS (Always On Server)` | 无人值守运行游戏（自动睡觉、跳过剧情、自动操作） | [➡️](Mods/ALOS/README.md)
+| `ServerCmd` | 在无头服务器环境下执行控制指令 | -
+| `ChatCommand` | 允许在游戏聊天框中执行控制台指令 | [➡️](Mods/ChatCommand/README.md)
+| `CommandWebUI` | 在web浏览器中使用smapi控制台 | [➡️](Mods/CommandWebUI/README.md)|
+
+>在`realase`页中,会打包其他作者的Mod(与本项目搭配使用更佳的Mods)，可根据`manifest.json`中的信息找到对应的仓库/作者并且为他们提供支持
+
 
 ## 😘 社区支持
 ### 🐧 QQ交流群

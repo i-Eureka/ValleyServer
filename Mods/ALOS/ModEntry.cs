@@ -76,7 +76,7 @@ namespace ALOS
         SDate spiritsEve = new SDate(27, "fall");
         SDate festivalOfIce = new SDate(8, "winter");
         SDate feastOfWinterStar = new SDate(25, "winter");
-        SDate grampasGhost = new SDate(1, "spring", 3);
+        SDate granpasGhost = new SDate(1, "spring", 3);
         ///////////////////////////////////////////////////////
 
         //variables for timeout reset code
@@ -1055,7 +1055,7 @@ namespace ALOS
             spiritsEve = new SDate(27, "fall");
             festivalOfIce = new SDate(8, "winter");
             feastOfWinterStar = new SDate(25, "winter");
-            grampasGhost = new SDate(1, "spring", 3);
+            granpasGhost = new SDate(1, "spring", 3);
             if (IsAutomating)
             {
                 gameClockTicks += 1;
@@ -1174,7 +1174,7 @@ namespace ALOS
             //handles various events that the host normally has to click through
             if (IsAutomating)
             {
-                if (currentDate != grampasGhost && currentDate != eggFestival && currentDate != flowerDance && currentDate != luau && currentDate != danceOfJellies && currentDate != stardewValleyFair && currentDate != spiritsEve && currentDate != festivalOfIce && currentDate != feastOfWinterStar)
+                if (currentDate != granpasGhost && currentDate != eggFestival && currentDate != flowerDance && currentDate != luau && currentDate != danceOfJellies && currentDate != stardewValleyFair && currentDate != spiritsEve && currentDate != festivalOfIce && currentDate != feastOfWinterStar)
                 {
                     if (currentTime == 620)
                     {

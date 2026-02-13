@@ -5,4 +5,11 @@
 ## example
 1. if you want to use command `alos.go_to_sleep`
 2. input `!cmd>alos.go_to_sleep` in chatbox
-3.
+
+## 使用示例
+1. 如果你想执行指令 `alos.go_to_sleep`
+2. 按T打开游戏内聊天框，并输入 `!cmd>alos.go_to_sleep` 
+   
+## ⚠️
+e.Both host and farm helper can use this function, but only install in host.
+c.本Mod只需安装在农场主人端，安装完成后农场主人和农场帮手都可以使用这个Mods 
