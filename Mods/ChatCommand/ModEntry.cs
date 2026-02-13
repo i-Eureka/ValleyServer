@@ -106,7 +106,7 @@ public class ModEntry : Mod
     private CommandInvoker cmdinvoker;
     public override void Entry(IModHelper helper)
     {
-        helper.ConsoleCommands.Add("test", "A test command", this.TestCommand);
+        
         //
         helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
         cmdinvoker = new CommandInvoker(helper, this.Monitor);
@@ -168,13 +168,7 @@ public class ModEntry : Mod
 
 
 
-    private void TestCommand(string arg1, string[] arg2)
-    {
-        //throw new NotImplementedException();
-        //Game1.Multiplayer.receiveChatMessage(Game1.player, 0, LocalizedContentManager.CurrentLanguageCode, "hello");
-        cmdinvoker.InvokeCommand("alos.server", arg2);
-        //Monitor.Log("Test", LogLevel.Info);
-    }
+ 
 
     public void InvokeCommand(string command)
     {
