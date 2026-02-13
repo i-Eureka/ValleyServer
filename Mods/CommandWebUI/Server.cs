@@ -50,7 +50,7 @@ namespace CommandWebUI
         {
             running = true;
             listener.Start();
-            monitor.Log($"Server listening on http://0.0.0.0:{this.Port}/", LogLevel.Info);
+            monitor.Log($"Server listening on http://<address>:{this.Port}/", LogLevel.Info);
 
             while (running)
             {
