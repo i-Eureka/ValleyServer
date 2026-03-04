@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.Menus; // 必须引入这个，用于识别菜单类型
+using StardewValley.Menus; // 用于识别菜单类型
 
 namespace AutoPause
 {
@@ -26,26 +26,41 @@ namespace AutoPause
         }
 
         /// <summary>
-        /// 核心修复：精准判断哪些界面才允许触发暂停
+        /// 增加黑白名单机制
         /// </summary>
-        private bool IsMenuValidForPause(IClickableMenu menu)
+private bool IsMenuValidForPause(IClickableMenu menu)
         {
             if (menu == null) return false;
 
-            // 1. 黑名单：绝对不能暂停的界面
-            if (menu is ReadyCheckDialog) return false; // 联机等待界面（如上床睡觉、进节日）
+            // 1. 黑名单：不暂停
+            if (menu is ReadyCheckDialog) return false; // 等待玩家（睡觉、节日）
             if (menu is ChatBox) return false;          // 聊天框
-            if (menu is ShippingMenu) return false;     // 每日结算出货界面
+            if (menu is ShippingMenu) return false;     // 每日出货结算
 
-            // 2. 白名单：只有打开这些界面才触发暂停
-            return menu is GameMenu ||           // 主菜单（背包、技能、社交、制作等）
-                   menu is ItemGrabMenu ||       // 箱子、物流等物品交互界面
-                   menu is ShopMenu ||           // 商店界面
-                   menu is DialogueBox ||        // 对话界面（包括 NPC 聊天）
-                   menu is QuestLog ||           // 任务日志
-                   menu is Billboard ||          // 告示板
-                   menu is LetterViewerMenu ||   // 阅读信件
-                   menu is CarpenterMenu;        // 罗宾的建筑界面
+            // ==========================================
+            // 核心修复：针对 DialogueBox (对话框) 的精细过滤
+            // ==========================================
+            if (menu is DialogueBox)
+            {
+                // 吃东西不触发暂停
+                if (Game1.player.itemToEat != null) 
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            // 2. 白名单：自动暂停
+            return menu is GameMenu ||              // 主菜单（背包、技能、社交等）
+                   menu is ItemGrabMenu ||          // 箱子、物流等物品交互界面
+                   menu is ShopMenu ||              // 普通NPC商店 (皮埃尔、威利等)
+                   menu is PurchaseAnimalsMenu ||   // 找玛妮买动物
+                   menu is GeodeMenu ||             // 找铁匠砸晶石
+                   menu is MuseumMenu ||            // 找冈瑟捐献
+                   menu is QuestLog ||              // 任务日志
+                   menu is Billboard ||             // 告示板/日历
+                   menu is LetterViewerMenu ||      // 阅读信件
+                   menu is CarpenterMenu;           // 罗宾/法师建造界面
         }
 
         private void OnMenuChanged(object sender, MenuChangedEventArgs e)
@@ -58,13 +73,13 @@ namespace AutoPause
 
             if (shouldPauseNow && !_isPausedByMod)
             {
-                _ = this.TriggerWebSocketCommand("暂停 (打开有效界面)");
+                _ = this.TriggerWebSocketCommand("暂停 (触发白名单)");
                 _isPausedByMod = true;
             }
             // 重点修复：如果切换到了无效界面（如睡觉等待界面），立即恢复游戏
             else if (!shouldPauseNow && _isPausedByMod)
             {
-                _ = this.TriggerWebSocketCommand("恢复 (关闭或切换界面)");
+                _ = this.TriggerWebSocketCommand("恢复");
                 _isPausedByMod = false;
             }
         }
