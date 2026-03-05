@@ -43,6 +43,17 @@ namespace AutoPause
                 if (Game1.player.itemToEat != null) return false;
                 return true;
             }
+            
+            // 新增：第三方 Mod 界面兼容
+            string menuFullName = menu.GetType().FullName;
+            if (!string.IsNullOrEmpty(menuFullName))
+            {
+                // 兼容 Lookup Anything
+                if (menuFullName.StartsWith("Pathoschild.Stardew.LookupAnything"))
+                    return true;
+                //  Generic Mod Config Menu
+                // if (menuFullName.StartsWith("GenericModConfigMenu")) return true;
+            }
 
             // 2. 白名单
             return menu is GameMenu ||              
