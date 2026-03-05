@@ -6,7 +6,7 @@ namespace AutoPause
         public string ServerIP { get; set; } = "127.0.0.1";
         public int ServerPort { get; set; } = 29103; 
         // public string AccessToken { get; set; } = "在这里填入你的Token";
-        public string Command { get; set; } = "alos.pause";
-        public string Command { get; set; } = "alos.start";
+        public string PauseCommand { get; set; } = "alos.pause";
+        public string ResumeCommand { get; set; } = "alos.start";
     }
 }
