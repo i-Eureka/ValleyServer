@@ -98,6 +98,8 @@ namespace ALOS
             helper.ConsoleCommands.Add("alos.debug_server", "Turns debug mode on/off, lets server run when no players are connected", this.DebugToggle);
             helper.ConsoleCommands.Add("alos.go_to_sleep", "Toggles festivals on/off", this.HandleGoToBed);
 		    helper.ConsoleCommands.Add("alos.pause", "Toggles festivals on/off", this.HandlePauseSingle);
+			// 独立的恢复游戏指令
+			helper.ConsoleCommands.Add("alos.start", "Forces the game to unpause and run", this.HandleStartSingle);
 
 
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
@@ -116,7 +118,12 @@ namespace ALOS
             this.clientPaused = !this.clientPaused;
 		    Game1.netWorldState.Value.IsPaused = !this.clientPaused;
         }
-
+        private void HandleStartSingle(string arg1, string[] arg2)
+        {
+            // 强制将状态设置为“未暂停”
+            this.clientPaused = false;
+            Game1.netWorldState.Value.IsPaused = false;
+        }
         private void HandleGoToBed(string arg1, string[] arg2)
         {
             if (Context.IsWorldReady)
