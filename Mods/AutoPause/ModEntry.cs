@@ -20,8 +20,10 @@ namespace AutoPause
             this.Config = helper.ReadConfig<ModConfig>();
             helper.WriteConfig(this.Config);
 
+            // 监听菜单变化 (核心暂停/恢复)
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
             helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
 
             this.Monitor.Log($"AutoPause 已启动。目标: ws://{this.Config.ServerIP}:{this.Config.ServerPort}/ws", LogLevel.Info);
         }
@@ -35,7 +37,7 @@ namespace AutoPause
             if (menu is ChatBox) return false;          
             if (menu is ShippingMenu) return false;     
 
-            // 吃东西过滤
+            // 针对吃东西确认框的拦截
             if (menu is DialogueBox)
             {
                 if (Game1.player.itemToEat != null) return false;
@@ -62,14 +64,12 @@ namespace AutoPause
 
             if (shouldPauseNow && !_isPausedByMod)
             {
-                // 发送暂停指令 (alos.pause)
-                _ = this.TriggerWebSocketCommand("暂停游戏", this.Config.PauseCommand);
+                _ = this.TriggerWebSocketCommand("打开菜单暂停", this.Config.PauseCommand);
                 _isPausedByMod = true;
             }
             else if (!shouldPauseNow && _isPausedByMod)
             {
-                // 发送恢复指令 (alos.start)
-                _ = this.TriggerWebSocketCommand("恢复游戏", this.Config.ResumeCommand);
+                _ = this.TriggerWebSocketCommand("关闭菜单恢复", this.Config.ResumeCommand);
                 _isPausedByMod = false;
             }
         }
@@ -78,13 +78,22 @@ namespace AutoPause
         {
             if (_isPausedByMod)
             {
-                // 退出游戏时发送一次恢复指令，避免客机在暂停页面退出游戏时，游戏仍处于暂停状态
-                _ = this.TriggerWebSocketCommand("退回主界面发送恢复游戏指令", this.Config.ResumeCommand);
+                _ = this.TriggerWebSocketCommand("退回标题恢复", this.Config.ResumeCommand);
                 _isPausedByMod = false;
             }
         }
 
-        // 新增了一个参数 commandStr，用来动态接收要发送的指令文本
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            if (Context.IsMultiplayer && !Context.IsMainPlayer)
+            {
+                // 重置本地状态，并强制发送一次恢复命令
+                _isPausedByMod = false;
+                _ = this.TriggerWebSocketCommand("重新连接发送恢复", this.Config.ResumeCommand);
+                this.Monitor.Log("[AutoPause] 玩家刚连入服务器，已执行强制恢复操作。", LogLevel.Info);
+            }
+        }
+
         private async Task TriggerWebSocketCommand(string action, string commandStr)
         {
             using (var ws = new ClientWebSocket())
@@ -98,7 +107,7 @@ namespace AutoPause
                     ArraySegment<byte> bytesToSend = new ArraySegment<byte>(commandBytes);
 
                     await ws.SendAsync(bytesToSend, WebSocketMessageType.Text, true, CancellationToken.None);
-                    this.Monitor.Log($"[AutoPause] {action} 指令 ({commandStr}) 已发送", LogLevel.Info);
+                    this.Monitor.Log($"[AutoPause] {action} - 发送了指令: {commandStr}", LogLevel.Info);
 
                     await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Command Sent", CancellationToken.None);
                 }
