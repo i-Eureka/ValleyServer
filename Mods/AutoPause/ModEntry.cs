@@ -66,7 +66,8 @@ namespace AutoPause
                    menu is Billboard ||             
                    menu is LetterViewerMenu ||      
                    menu is CarpenterMenu ||      
-                   menu is JunimoNoteMenu;
+                   menu is JunimoNoteMenu ||      
+                   menu is CraftingPage;
         }
 
         private void OnMenuChanged(object sender, MenuChangedEventArgs e)
