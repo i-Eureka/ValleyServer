@@ -44,6 +44,18 @@ namespace AutoPause
                 return true;
             }
             
+            // 修复在建筑界面或动物放置界面不能恢复游戏的问题
+            if (menu is CarpenterMenu carpenterMenu)
+            {
+                bool isFrozen = this.Helper.Reflection.GetField<bool>(carpenterMenu, "freeze", false)?.GetValue() ?? false;
+                if (isFrozen) return false; 
+            }
+            if (menu is PurchaseAnimalsMenu animalMenu)
+            {
+                bool isFrozen = this.Helper.Reflection.GetField<bool>(animalMenu, "freeze", false)?.GetValue() ?? false;
+                if (isFrozen) return false; 
+            }
+
             // 新增：第三方 Mod 界面兼容
             string menuFullName = menu.GetType().FullName;
             if (!string.IsNullOrEmpty(menuFullName))
