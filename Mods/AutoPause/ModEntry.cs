@@ -20,9 +20,7 @@ namespace AutoPause
             this.Config = helper.ReadConfig<ModConfig>();
             helper.WriteConfig(this.Config);
 
-            // 监听菜单变化 (核心暂停/恢复)
-            helper.Events.Display.MenuChanged += this.OnMenuChanged;
-            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
 
             this.Monitor.Log($"AutoPause 已启动。目标: ws://{this.Config.ServerIP}:{this.Config.ServerPort}/ws", LogLevel.Info);
@@ -37,13 +35,12 @@ namespace AutoPause
             if (menu is ChatBox) return false;          
             if (menu is ShippingMenu) return false;     
 
-            // 针对吃东西确认框的拦截
             if (menu is DialogueBox)
             {
                 if (Game1.player.itemToEat != null) return false;
                 return true;
             }
-            
+
             // 修复在建筑界面或动物放置界面不能恢复游戏的问题
             if (menu is CarpenterMenu carpenterMenu)
             {
@@ -55,7 +52,7 @@ namespace AutoPause
                 bool isFrozen = this.Helper.Reflection.GetField<bool>(animalMenu, "freeze", false)?.GetValue() ?? false;
                 if (isFrozen) return false; 
             }
-
+            
             // 新增：第三方 Mod 界面兼容
             string menuFullName = menu.GetType().FullName;
             if (!string.IsNullOrEmpty(menuFullName))
@@ -77,33 +74,24 @@ namespace AutoPause
                    menu is QuestLog ||              
                    menu is Billboard ||             
                    menu is LetterViewerMenu ||      
-                   menu is CarpenterMenu ||      
-                   menu is JunimoNoteMenu ||      
-                   menu is CraftingPage;
+                   menu is CarpenterMenu ||         
+                   menu is JunimoNoteMenu ||        
+                   menu is CraftingPage;            
         }
 
-        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             bool isValidClient = Context.IsMultiplayer && !Context.IsMainPlayer;
-            bool shouldPauseNow = isValidClient && IsMenuValidForPause(e.NewMenu);
+            bool shouldPauseNow = isValidClient && IsMenuValidForPause(Game1.activeClickableMenu);
 
             if (shouldPauseNow && !_isPausedByMod)
             {
-                _ = this.TriggerWebSocketCommand("打开菜单暂停", this.Config.PauseCommand);
+                _ = this.TriggerWebSocketCommand("打开菜单", this.Config.PauseCommand);
                 _isPausedByMod = true;
             }
             else if (!shouldPauseNow && _isPausedByMod)
             {
-                _ = this.TriggerWebSocketCommand("关闭菜单恢复", this.Config.ResumeCommand);
-                _isPausedByMod = false;
-            }
-        }
-
-        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
-        {
-            if (_isPausedByMod)
-            {
-                _ = this.TriggerWebSocketCommand("退回标题恢复", this.Config.ResumeCommand);
+                _ = this.TriggerWebSocketCommand("关闭或过渡", this.Config.ResumeCommand);
                 _isPausedByMod = false;
             }
         }
@@ -112,10 +100,8 @@ namespace AutoPause
         {
             if (Context.IsMultiplayer && !Context.IsMainPlayer)
             {
-                // 重置本地状态，并强制发送一次恢复命令
                 _isPausedByMod = false;
-                _ = this.TriggerWebSocketCommand("重新连接发送恢复", this.Config.ResumeCommand);
-                this.Monitor.Log("[AutoPause] 玩家刚连入服务器，已执行强制恢复操作。", LogLevel.Info);
+                _ = this.TriggerWebSocketCommand("重连恢复游戏", this.Config.ResumeCommand);
             }
         }
 
@@ -132,13 +118,13 @@ namespace AutoPause
                     ArraySegment<byte> bytesToSend = new ArraySegment<byte>(commandBytes);
 
                     await ws.SendAsync(bytesToSend, WebSocketMessageType.Text, true, CancellationToken.None);
-                    this.Monitor.Log($"[AutoPause] {action} - 发送了指令: {commandStr}", LogLevel.Info);
+                    this.Monitor.Log($"[AutoPause] {action} - 指令: {commandStr}", LogLevel.Info);
 
                     await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Command Sent", CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
-                    this.Monitor.Log($"[AutoPause] WebSocket 发送失败: {ex.Message}", LogLevel.Error);
+                    this.Monitor.Log($"[AutoPause] WebSocket 失败: {ex.Message}", LogLevel.Error);
                 }
             }
         }
