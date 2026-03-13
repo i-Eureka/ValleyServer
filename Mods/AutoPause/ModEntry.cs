@@ -78,7 +78,9 @@ namespace AutoPause
                    menu is CarpenterMenu ||         
                    menu is JunimoNoteMenu ||        
                    menu is CraftingPage ||
-                   menu is NamingMenu;
+                   menu is NamingMenu ||
+                   menu is TailoringMenu ||
+                   menu is ForgeMenu;
         }
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
