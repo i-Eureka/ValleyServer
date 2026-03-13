@@ -29,6 +29,7 @@ namespace AutoPause
         private bool IsMenuValidForPause(IClickableMenu menu)
         {
             if (menu == null) return false;
+            if (Game1.fadeToBlack) return false;
 
             // 1. 黑名单
             if (menu is ReadyCheckDialog) return false; 
@@ -76,7 +77,8 @@ namespace AutoPause
                    menu is LetterViewerMenu ||      
                    menu is CarpenterMenu ||         
                    menu is JunimoNoteMenu ||        
-                   menu is CraftingPage;            
+                   menu is CraftingPage ||
+                   menu is NamingMenu;
         }
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
