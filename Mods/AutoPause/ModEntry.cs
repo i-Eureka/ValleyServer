@@ -61,6 +61,9 @@ namespace AutoPause
                 // 兼容 Lookup Anything
                 if (menuFullName.StartsWith("Pathoschild.Stardew.LookupAnything"))
                     return true;
+                // 兼容 Chests Anywhere
+                if (menuFullName.StartsWith("Pathoschild.Stardew.ChestsAnywhere"))
+                    return true;
                 //  Generic Mod Config Menu
                 // if (menuFullName.StartsWith("GenericModConfigMenu")) return true;
             }
